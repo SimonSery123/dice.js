@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decision Dice</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #f1f5f9;
+            overflow: hidden;
+        }
+
+        .main-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .dice-stage {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        #dice-canvas {
+            max-width: 90vw;
+            max-height: 70vh;
+        }
+
+        .roll-button {
+            position: absolute;
+            bottom: 60px;
+            background: #3b82f6;
+            color: white;
+            padding: 20px 40px;
+            border: none;
+            border-radius: 16px;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .roll-button:hover {
+            background: #2563eb;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.6);
+        }
+
+        .roll-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            background: #64748b;
+            box-shadow: none;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90vw;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            border: 1px solid #334155;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-bottom: 8px;
+        }
+
+        .modal-subtitle {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .options-section {
+            margin-bottom: 25px;
+        }
+
+        .options-list {
+            margin-bottom: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 12px 16px;
+            background: #334155;
+            border-radius: 12px;
+            border: 1px solid #475569;
+            transition: all 0.2s ease;
+        }
+
+        .option-item:hover {
+            background: #3f4a5f;
+            border-color: #64748b;
+        }
+
+        .option-text {
+            flex: 1;
+            margin-right: 12px;
+            font-weight: 500;
+            color: #f1f5f9;
+            font-size: 14px;
+        }
+
+        .remove-btn {
+            background: #ef4444;
+            border: none;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .remove-btn:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+
+        .input-section {
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .option-input {
+            flex: 1;
+            padding: 14px 16px;
+            border: 2px solid #475569;
+            border-radius: 12px;
+            background: #334155;
+            color: #f1f5f9;
+            font-size: 16px;
+            transition: border-color 0.2s ease;
+        }
+
+        .option-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .option-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .add-btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            background: #10b981;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .add-btn:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cancel {
+            background: #64748b;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #475569;
+        }
+
+        .btn-roll-modal {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-roll-modal:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-roll-modal:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            background: #64748b;
+        }
+
+        /* Title */
+        .app-title {
+            position: absolute;
+            top: 40px;
+            font-size: 32px;
+            font-weight: 700;
+            color: #f8fafc;
+            text-align: center;
+            opacity: 0.9;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .modal {
+                padding: 20px;
+            }
+
+            .roll-button {
+                bottom: 40px;
+                padding: 16px 32px;
+                font-size: 18px;
+            }
+
+            .app-title {
+                font-size: 24px;
+                top: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <div class="app-title">🎲 Decision Dice</div>
+
+        <div class="dice-stage">
+            <canvas id="dice-canvas"></canvas>
+        </div>
+
+        <button class="roll-button" id="main-roll-btn" onclick="openModal()">
+            🎲 Set Options & Roll
+        </button>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">🎲 Set Your Options</div>
+                <div class="modal-subtitle">Add your choices, then roll the dice</div>
+            </div>
+
+            <div class="options-section">
+                <div class="options-list" id="options-list">
+                    <div class="option-item">
+                        <span class="option-text">Add your first option below!</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <div class="input-group">
+                    <input type="text" class="option-input" id="option-input" placeholder="Enter a decision option..."
+                        maxlength="50">
+                    <button class="add-btn" onclick="addOption()">Add</button>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="modal-btn btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="modal-btn btn-roll-modal" id="modal-roll-btn" onclick="startRoll()" disabled>
+                    🎲 Roll Dice
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let options = [];
+        let isRolling = false;
+
+        // Three.js setup
+        let scene, camera, renderer, dice;
+        let animationId;
+
+        function initThreeJS() {
+            const canvas = document.getElementById('dice-canvas');
+            const container = canvas.parentElement;
+
+            // Scene setup
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+
+            // Set size to fill most of screen
+            const width = Math.min(window.innerWidth * 0.9, 800);
+            const height = Math.min(window.innerHeight * 0.6, 600);
+            renderer.setSize(width, height);
+            renderer.setClearColor(0x000000, 0);
+
+            // Create HUGE dice - 4x bigger!
+            const geometry = new THREE.BoxGeometry(6, 6, 6);
+            const materials = [];
+
+            // Create materials for each face with high resolution
+            for (let i = 0; i < 6; i++) {
+                const canvas2d = document.createElement('canvas');
+                canvas2d.width = 1024;
+                canvas2d.height = 1024;
+                const context = canvas2d.getContext('2d');
+
+                // Background - slightly off-white for better contrast
+                context.fillStyle = '#f8f8f8';
+                context.fillRect(0, 0, 1024, 1024);
+
+                // Border
+                context.strokeStyle = '#1e293b';
+                context.lineWidth = 30; // Thicker border
+                context.strokeRect(20, 20, 984, 984);
+
+                // Placeholder number
+                context.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                context.shadowBlur = 4;
+                context.shadowOffsetX = 2;
+                context.shadowOffsetY = 2;
+
+                context.fillStyle = '#1e293b';
+                context.font = 'bold 300px Arial';
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                context.fillText((i + 1).toString(), 512, 512);
+
+                const texture = new THREE.CanvasTexture(canvas2d);
+                materials.push(new THREE.MeshPhongMaterial({
+                    map: texture,
+                    shininess: 30, // Less shiny
+                    specular: new THREE.Color(0x111111) // Very subtle specular
+                }));
+            }
+
+            dice = new THREE.Mesh(geometry, materials);
+            scene.add(dice);
+
+            // Add subtle "table" with grid lines
+            const tableGeometry = new THREE.PlaneGeometry(20, 20);
+            const tableMaterial = new THREE.MeshLambertMaterial({
+                color: 0x1e293b,
+                transparent: true,
+                opacity: 0.6
+            });
+            const table = new THREE.Mesh(tableGeometry, tableMaterial);
+            table.rotation.x = -Math.PI / 2;
+            table.position.y = -3;
+            scene.add(table);
+
+            // Add grid lines to table
+            const gridHelper = new THREE.GridHelper(20, 10, 0x334155, 0x2a3441);
+            gridHelper.position.y = -2.99; // Just above table surface
+            scene.add(gridHelper);
+
+            // Position camera to look down at dice (like looking at table)
+            camera.position.z = 8;
+            camera.position.y = 8;
+            camera.position.x = 2;
+            camera.lookAt(0, 0, 0);
+
+            // Lighting optimized for table-top view
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 10, 5); // Light from above like ceiling light
+            scene.add(directionalLight);
+
+            const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
+            fillLight.position.set(-5, 5, -5); // Soft fill light
+            scene.add(fillLight);
+
+            // Winner spotlight (initially off)
+            const winnerSpotlight = new THREE.SpotLight(0xffdd88, 2, 0, Math.PI / 6, 0.5, 1); // Golden light
+            winnerSpotlight.position.set(0, 8, 0);
+            winnerSpotlight.target.position.set(0, 0, 0);
+            winnerSpotlight.visible = false; // Start hidden
+            scene.add(winnerSpotlight);
+            scene.add(winnerSpotlight.target);
+
+            // Add extra point light for winner effect (initially off)
+            const winnerPointLight = new THREE.PointLight(0xffcc66, 0, 15); // Warm golden
+            winnerPointLight.position.set(0, 8, 0);
+            winnerPointLight.visible = false;
+            scene.add(winnerPointLight);
+
+            // Store lights for later access
+            window.sceneLights = {
+                ambient: ambientLight,
+                directional: directionalLight,
+                fill: fillLight,
+                winner: winnerSpotlight,
+                winnerPoint: winnerPointLight
+            };
+
+            // Start render loop
+            animate();
+
+            // Handle resize
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function animate() {
+            animationId = requestAnimationFrame(animate);
+
+            if (!isRolling) {
+                // Very subtle idle movement - like dice barely moving on table
+                dice.rotation.y += 0.002;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            const width = Math.min(window.innerWidth * 0.9, 800);
+            const height = Math.min(window.innerHeight * 0.6, 600);
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        }
+
+        function updateDiceFaces() {
+            if (options.length === 0) return;
+
+            for (let i = 0; i < 6; i++) {
+                const canvas2d = document.createElement('canvas');
+                canvas2d.width = 1024;
+                canvas2d.height = 1024;
+                const context = canvas2d.getContext('2d');
+
+                // Background - slightly off-white for better contrast
+                context.fillStyle = '#f8f8f8';
+                context.fillRect(0, 0, 1024, 1024);
+
+                // Border
+                context.strokeStyle = '#1e293b';
+                context.lineWidth = 30; // Thicker border
+                context.strokeRect(20, 20, 984, 984);
+
+                // Main text
+                if (i < options.length) {
+                    context.textAlign = 'center';
+                    context.textBaseline = 'middle';
+
+                    const optionText = options[i];
+
+                    // Add subtle shadow for better readability
+                    context.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                    context.shadowBlur = 4;
+                    context.shadowOffsetX = 2;
+                    context.shadowOffsetY = 2;
+
+                    context.fillStyle = '#1e293b';
+
+                    // Adjust font size for massive dice - BIGGER TEXT!
+                    if (optionText.length <= 4) {
+                        context.font = 'bold 220px Arial';
+                        context.fillText(optionText, 512, 512);
+                    } else if (optionText.length <= 8) {
+                        context.font = 'bold 180px Arial';
+                        context.fillText(optionText, 512, 512);
+                    } else if (optionText.length <= 12) {
+                        context.font = 'bold 140px Arial';
+                        context.fillText(optionText, 512, 512);
+                    } else {
+                        // Multi-line for longer text
+                        context.font = 'bold 110px Arial';
+                        const words = optionText.split(' ');
+                        let line = '';
+                        let y = 512;
+                        const maxWidth = 750;
+
+                        for (let n = 0; n < words.length; n++) {
+                            const testLine = line + words[n] + ' ';
+                            const metrics = context.measureText(testLine);
+
+                            if (metrics.width > maxWidth && n > 0) {
+                                context.fillText(line.trim(), 512, y - 70);
+                                line = words[n] + ' ';
+                                y += 140;
+                            } else {
+                                line = testLine;
+                            }
+                        }
+                        context.fillText(line.trim(), 512, y - 70);
+                    }
+
+                    // Reset shadow
+                    context.shadowColor = 'transparent';
+                    context.shadowBlur = 0;
+                    context.shadowOffsetX = 0;
+                    context.shadowOffsetY = 0;
+                } else {
+                    // Empty face
+                    context.fillStyle = '#94a3b8';
+                    context.font = 'bold 200px Arial';
+                    context.textAlign = 'center';
+                    context.textBaseline = 'middle';
+                    context.fillText('?', 512, 512);
+                }
+
+                const texture = new THREE.CanvasTexture(canvas2d);
+                dice.material[i].map = texture;
+                dice.material[i].needsUpdate = true;
+            }
+        }
+
+        // Modal functions
+        function openModal() {
+            document.getElementById('modal-overlay').classList.add('active');
+            document.getElementById('option-input').focus();
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('active');
+        }
+
+        function addOption() {
+            const input = document.getElementById('option-input');
+            const text = input.value.trim();
+
+            if (text && options.length < 6) {
+                options.push(text);
+                input.value = '';
+                updateOptionsDisplay();
+                updateDiceFaces();
+                updateModalRollButton();
+            }
+        }
+
+        function removeOption(index) {
+            options.splice(index, 1);
+            updateOptionsDisplay();
+            updateDiceFaces();
+            updateModalRollButton();
+        }
+
+        function updateOptionsDisplay() {
+            const container = document.getElementById('options-list');
+
+            if (options.length === 0) {
+                container.innerHTML = '<div class="option-item"><span class="option-text">Add your first option below!</span></div>';
+            } else {
+                container.innerHTML = options.map((option, index) =>
+                    `<div class="option-item">
+                        <span class="option-text">${option}</span>
+                        <button class="remove-btn" onclick="removeOption(${index})">×</button>
+                    </div>`
+                ).join('');
+            }
+        }
+
+        function updateModalRollButton() {
+            const rollBtn = document.getElementById('modal-roll-btn');
+            rollBtn.disabled = options.length < 2;
+
+            if (options.length < 2) {
+                rollBtn.textContent = `🎲 Need ${2 - options.length} more options`;
+            } else {
+                rollBtn.textContent = '🎲 Roll Dice';
+            }
+        }
+
+        function startRoll() {
+            closeModal();
+            rollDice();
+        }
+
+        function rollDice() {
+            if (options.length < 2 || isRolling) return;
+
+            isRolling = true;
+            const mainBtn = document.getElementById('main-roll-btn');
+
+            mainBtn.style.opacity = '0';
+            mainBtn.disabled = true;
+
+            // Reset lighting for fresh roll
+            resetLighting();
+
+            // Pre-determine which face will end UP (like real dice)
+            const winningFace = Math.floor(Math.random() * Math.min(options.length, 6));
+
+            // Define stable orientations where each face points UP
+            const stableOrientations = [
+                { x: 0, y: 0, z: -Math.PI / 2 },        // Face 0 (+X) up
+                { x: 0, y: 0, z: Math.PI / 2 },         // Face 1 (-X) up  
+                { x: 0, y: 0, z: 0 },                 // Face 2 (+Y) up - natural top
+                { x: Math.PI, y: 0, z: 0 },           // Face 3 (-Y) up - bottom becomes top
+                { x: Math.PI / 2, y: 0, z: 0 },         // Face 4 (+Z) up - front becomes top
+                { x: -Math.PI / 2, y: 0, z: 0 }         // Face 5 (-Z) up - back becomes top
+            ];
+
+            const targetOrientation = stableOrientations[winningFace];
+
+            // Store initial rotation
+            const initialRotation = {
+                x: dice.rotation.x,
+                y: dice.rotation.y,
+                z: dice.rotation.z
+            };
+
+            // Add dramatic spins before settling to target
+            const spins = Math.floor(Math.random() * 4) + 3; // 3-6 full rotations
+            const finalRotation = {
+                x: targetOrientation.x + (spins * Math.PI * 2),
+                y: targetOrientation.y + (spins * Math.PI * 2),
+                z: targetOrientation.z + (spins * Math.PI * 2)
+            };
+
+            // Animation variables
+            let rollTime = 0;
+            const rollDuration = 4000; // 4 seconds for maximum drama
+
+            function rollAnimation() {
+                if (rollTime < rollDuration) {
+                    const progress = rollTime / rollDuration;
+                    const easeOut = 1 - Math.pow(1 - progress, 4); // Smooth deceleration
+
+                    // Interpolate rotation
+                    dice.rotation.x = initialRotation.x + (finalRotation.x - initialRotation.x) * easeOut;
+                    dice.rotation.y = initialRotation.y + (finalRotation.y - initialRotation.y) * easeOut;
+                    dice.rotation.z = initialRotation.z + (finalRotation.z - initialRotation.z) * easeOut;
+
+                    rollTime += 16;
+                    requestAnimationFrame(rollAnimation);
+                } else {
+                    // Snap to exact stable position (like real dice settling)
+                    dice.rotation.x = targetOrientation.x;
+                    dice.rotation.y = targetOrientation.y;
+                    dice.rotation.z = targetOrientation.z;
+
+                    // WINNER SHINE EFFECT! ✨ - Immediate, no delay
+                    activateWinnerShine();
+
+                    // Roll finished - show button again
+                    setTimeout(() => {
+                        mainBtn.textContent = '🎲 Roll Again';
+                        mainBtn.style.opacity = '1';
+                        mainBtn.disabled = false;
+                        isRolling = false;
+                    }, 2000); // Longer pause to enjoy the shine effect
+                }
+            }
+
+            rollAnimation();
+        }
+
+        function activateWinnerShine() {
+            const lights = window.sceneLights;
+
+            // Animation for dramatic lighting transition
+            const shineDuration = 1000; // 1 second transition
+            let shineTime = 0;
+
+            const originalAmbient = lights.ambient.intensity;
+            const originalDirectional = lights.directional.intensity;
+            const originalFill = lights.fill.intensity;
+
+            function createShine() {
+                if (shineTime < shineDuration) {
+                    const progress = shineTime / shineDuration;
+                    const easeOut = 1 - Math.pow(1 - progress, 2);
+
+                    // Dramatically dim all general lighting
+                    lights.ambient.intensity = originalAmbient * (1 - easeOut * 0.7); // Less extreme dimming
+                    lights.fill.intensity = originalFill * (1 - easeOut * 0.8); // Keep some fill
+                    lights.directional.intensity = originalDirectional * (1 - easeOut * 0.5); // Keep more directional
+
+                    // Controlled spotlight - bright but not blinding
+                    // lights.winner.intensity = easeOut * 3; // Much less intense
+                    // lights.winner.visible = true;
+                    // lights.winner.position.set(0, 10, 0); // Slightly lower
+                    // lights.winner.target.position.set(0, 0, 0); // Point at dice center
+                    // lights.winner.angle = Math.PI / 10; // Slightly wider beam
+                    // lights.winner.penumbra = 0.3; // Softer edges
+
+                    // Gentler point light for ambient glow
+                    lights.winnerPoint.intensity = easeOut * 1.5; // Subtle glow
+                    lights.winnerPoint.visible = true;
+                    lights.winnerPoint.position.set(0, 6, 0); // Closer to dice
+
+                    // Add a subtle camera shake for impact
+                    if (progress > 0.8) {
+                        const shake = (1 - progress) * 0.1;
+                        camera.position.x = 2 + (Math.random() - 0.5) * shake;
+                        camera.position.z = 8 + (Math.random() - 0.5) * shake;
+                    }
+
+                    shineTime += 16;
+                    requestAnimationFrame(createShine);
+                } else {
+                    // Final state - maintain dramatic but readable lighting
+                    lights.ambient.intensity = originalAmbient * 0.3; // Not too dark
+                    lights.directional.intensity = originalDirectional * 0.5; // Keep some general light
+                    lights.fill.intensity = originalFill * 0.2; // Subtle fill
+                    lights.winner.intensity = 3; // Bright but readable
+                    lights.winnerPoint.intensity = 1.5; // Gentle glow
+
+                    // Reset camera position
+                    camera.position.x = 2;
+                    camera.position.z = 8;
+
+                    // Optional: Add a subtle pulsing effect to the spotlight
+                    let pulseTime = 0;
+                    function pulseLight() {
+                        if (isRolling) return; // Stop pulsing when rolling again
+                        pulseTime += 0.05;
+                        lights.winner.intensity = 3 + Math.sin(pulseTime) * 0.3; // Gentle pulse
+                        lights.winnerPoint.intensity = 1.5 + Math.sin(pulseTime) * 0.2;
+                        requestAnimationFrame(pulseLight);
+                    }
+                    pulseLight();
+                }
+            }
+
+            createShine();
+        }
+
+
+
+        function resetLighting() {
+            const lights = window.sceneLights;
+            if (!lights) return;
+
+            // Reset to normal lighting for next roll
+            lights.ambient.intensity = 0.4;
+            lights.directional.intensity = 0.8;
+            lights.fill.intensity = 0.3;
+            lights.winner.visible = false;
+            lights.winner.intensity = 0;
+            lights.winnerPoint.visible = false;
+            lights.winnerPoint.intensity = 0;
+
+            // Reset camera position in case it was shaking
+            camera.position.x = 2;
+            camera.position.z = 8;
+        }
+
+        // Input handling
+        document.addEventListener('keypress', function (e) {
+            if (e.target.id === 'option-input' && e.key === 'Enter') {
+                addOption();
+            }
+        });
+
+        // Close modal on escape
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            initThreeJS();
+            updateOptionsDisplay();
+            updateModalRollButton();
+        });
+    </script>
+</body>
+
+</html>
