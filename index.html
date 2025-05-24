@@ -4,8 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Decision Dice</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <title>About - Decision Dice</title>
     <style>
         * {
             margin: 0;
@@ -16,948 +15,767 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #0f172a;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
             color: #f1f5f9;
-            overflow: hidden;
+            overflow-x: hidden;
+            line-height: 1.6;
         }
 
-        .main-container {
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-
-        .dice-stage {
+        /* Animated background particles */
+        .bg-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #3b82f6;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+                opacity: 0.3;
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+                opacity: 0.8;
+            }
+        }
+
+        /* Header */
+        .header {
+            position: sticky;
+            top: 0;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 1rem 0;
+            z-index: 100;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #3b82f6;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-link {
+            color: #94a3b8;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
             position: relative;
         }
 
-        #dice-canvas {
-            max-width: 90vw;
-            max-height: 70vh;
+        .nav-link:hover {
+            color: #3b82f6;
         }
 
-        .roll-button {
+        .nav-link::after {
+            content: '';
             position: absolute;
-            bottom: 60px;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
             background: #3b82f6;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                transform: translateY(40px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .hero-emoji {
+            font-size: 6rem;
+            display: block;
+            margin-bottom: 1rem;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: #94a3b8;
+            margin-bottom: 2rem;
+            font-weight: 400;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
             color: white;
-            padding: 20px 40px;
-            border: none;
-            border-radius: 16px;
-            font-size: 20px;
-            font-weight: 700;
-            cursor: pointer;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
             transition: all 0.3s ease;
             box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
-        .roll-button:hover {
-            background: #2563eb;
+        .cta-button:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 30px rgba(59, 130, 246, 0.6);
         }
 
-        .roll-button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-            background: #64748b;
-            box-shadow: none;
+        /* Content Sections */
+        .section {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
-        /* Modal Styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.8);
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: #f8fafc;
+            animation: fadeInUp 0.8s ease-out both;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: rgba(30, 41, 59, 0.6);
             backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.8s ease-out both;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 10px 40px rgba(59, 130, 246, 0.2);
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #f8fafc;
+        }
+
+        .card-description {
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        /* Coming Soon Badge */
+        .coming-soon-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+            animation: pulse-badge 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-badge {
+
+            0%,
+            100% {
+                transform: scale(1);
+                box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+            }
+
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 4px 16px rgba(245, 158, 11, 0.5);
+            }
+        }
+
+        .feature-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.8s ease-out both;
+            position: relative;
+            /* Added for badge positioning */
+        }
+
+        /* Story Section */
+        .story-section {
+            background: rgba(30, 41, 59, 0.3);
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 3rem 0;
+            border: 1px solid rgba(59, 130, 246, 0.1);
+            animation: fadeInUp 0.8s ease-out both;
+        }
+
+        .story-text {
+            font-size: 1.1rem;
+            color: #cbd5e1;
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        .highlight {
+            color: #3b82f6;
+            font-weight: 600;
+        }
+
+        /* Stats Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .stat-card {
+            text-align: center;
+            animation: fadeInUp 0.8s ease-out both;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #3b82f6;
+            display: block;
+            animation: countUp 2s ease-out;
+        }
+
+        @keyframes countUp {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+
+        /* Team Section */
+        .team-section {
+            text-align: center;
+            padding: 3rem;
+            background: rgba(30, 41, 59, 0.3);
+            border-radius: 20px;
+            border: 1px solid rgba(59, 130, 246, 0.1);
+            animation: fadeInUp 0.8s ease-out both;
+        }
+
+        .team-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 1rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            }
+
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+            }
+        }
+
+        .team-text {
+            font-size: 1.1rem;
+            color: #cbd5e1;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid rgba(59, 130, 246, 0.2);
+            margin-top: 5rem;
+        }
+
+        .footer-text {
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links {
             display: flex;
             justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
+            gap: 2rem;
+            flex-wrap: wrap;
         }
 
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal {
-            background: #1e293b;
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 400px;
-            width: 90vw;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-            border: 1px solid #334155;
-            transform: scale(0.9) translateY(20px);
-            transition: all 0.3s ease;
-        }
-
-        .modal-overlay.active .modal {
-            transform: scale(1) translateY(0);
-        }
-
-        .modal-header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .modal-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: #f8fafc;
-            margin-bottom: 8px;
-        }
-
-        .modal-subtitle {
+        .footer-link {
             color: #94a3b8;
-            font-size: 14px;
+            text-decoration: none;
+            transition: color 0.3s ease;
         }
 
-        .options-section {
-            margin-bottom: 25px;
-        }
-
-        .options-list {
-            margin-bottom: 20px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .option-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            padding: 12px 16px;
-            background: #334155;
-            border-radius: 12px;
-            border: 1px solid #475569;
-            transition: all 0.2s ease;
-        }
-
-        .option-item:hover {
-            background: #3f4a5f;
-            border-color: #64748b;
-        }
-
-        .option-text {
-            flex: 1;
-            margin-right: 12px;
-            font-weight: 500;
-            color: #f1f5f9;
-            font-size: 14px;
-        }
-
-        .remove-btn {
-            background: #ef4444;
-            border: none;
-            color: white;
-            padding: 6px 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-weight: 600;
-            font-size: 12px;
-        }
-
-        .remove-btn:hover {
-            background: #dc2626;
-            transform: scale(1.1);
-        }
-
-        .input-section {
-            margin-bottom: 25px;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .option-input {
-            flex: 1;
-            padding: 14px 16px;
-            border: 2px solid #475569;
-            border-radius: 12px;
-            background: #334155;
-            color: #f1f5f9;
-            font-size: 16px;
-            transition: border-color 0.2s ease;
-        }
-
-        .option-input:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        .option-input::placeholder {
-            color: #94a3b8;
-        }
-
-        .add-btn {
-            padding: 14px 20px;
-            border: none;
-            border-radius: 12px;
-            background: #10b981;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .add-btn:hover {
-            background: #059669;
-            transform: translateY(-1px);
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-        }
-
-        .modal-btn {
-            flex: 1;
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-cancel {
-            background: #64748b;
-            color: white;
-        }
-
-        .btn-cancel:hover {
-            background: #475569;
-        }
-
-        .btn-roll-modal {
-            background: #3b82f6;
-            color: white;
-        }
-
-        .btn-roll-modal:hover {
-            background: #2563eb;
-            transform: translateY(-1px);
-        }
-
-        .btn-roll-modal:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-            background: #64748b;
-        }
-
-        /* Title */
-        .app-title {
-            position: absolute;
-            top: 40px;
-            font-size: 32px;
-            font-weight: 700;
-            color: #f8fafc;
-            text-align: center;
-            opacity: 0.9;
+        .footer-link:hover {
+            color: #3b82f6;
         }
 
         /* Responsive */
-        @media (max-width: 480px) {
-            .modal {
-                padding: 20px;
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
             }
 
-            .roll-button {
-                bottom: 40px;
-                padding: 16px 32px;
-                font-size: 18px;
+            .hero-subtitle {
+                font-size: 1.1rem;
             }
 
-            .app-title {
-                font-size: 24px;
-                top: 20px;
+            .section {
+                padding: 3rem 1rem;
             }
+
+            .nav-links {
+                display: none;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Scroll animations */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
     </style>
 </head>
 
 <body>
-    <div class="main-container">
-        <div class="app-title">🎲 Decision Dice</div>
+    <!-- Animated background -->
+    <div class="bg-particles" id="particles"></div>
 
-        <div class="dice-stage">
-            <canvas id="dice-canvas"></canvas>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <a href="#" class="logo">
+                🎲 Decision Dice
+            </a>
+            <ul class="nav-links">
+                <li><a href="#features" class="nav-link">Features</a></li>
+                <li><a href="#story" class="nav-link">Our Story</a></li>
+                <li><a href="#team" class="nav-link">Team</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <span class="hero-emoji">🎲</span>
+            <h1 class="hero-title">Decision Dice</h1>
+            <p class="hero-subtitle">The overthinking killer that helps you make decisions with confidence</p>
+            <a href="/app.html" class="cta-button">Try It Now</a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section" id="features">
+        <h2 class="section-title fade-in-up">Why Decision Dice?</h2>
+
+        <div class="cards-grid">
+            <div class="feature-card fade-in-up">
+                <span class="card-icon">⚡</span>
+                <h3 class="card-title">Kill Overthinking</h3>
+                <p class="card-description">Stop wasting time on simple decisions. Input your options and let the dice
+                    decide in seconds.</p>
+            </div>
+
+            <div class="feature-card fade-in-up">
+                <div class="coming-soon-badge">Coming Soon</div>
+                <span class="card-icon">🧠</span>
+                <h3 class="card-title">Smart Patterns</h3>
+                <p class="card-description">Our algorithm learns your patterns and gently pushes you outside your
+                    comfort zone.</p>
+            </div>
+
+            <div class="feature-card fade-in-up">
+                <div class="coming-soon-badge">Coming Soon</div>
+                <span class="card-icon">🎯</span>
+                <h3 class="card-title">Commitment Mode</h3>
+                <p class="card-description">Choose to follow through or lose your streak. Build decision-making
+                    confidence.</p>
+            </div>
+
+            <div class="feature-card fade-in-up">
+                <span class="card-icon">✨</span>
+                <h3 class="card-title">Beautiful 3D Experience</h3>
+                <p class="card-description">Watch realistic dice roll with stunning animations and physics.</p>
+            </div>
+
+            <div class="feature-card fade-in-up">
+                <span class="card-icon">🎨</span>
+                <h3 class="card-title">Custom Options</h3>
+                <p class="card-description">Add up to 6 personalized choices for any decision you're facing.</p>
+            </div>
+
+            <div class="feature-card fade-in-up">
+                <span class="card-icon">📱</span>
+                <h3 class="card-title">Works Everywhere</h3>
+                <p class="card-description">Responsive design that works perfectly on phone, tablet, or desktop.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Story Section -->
+    <section class="section" id="story">
+        <h2 class="section-title fade-in-up">Our Story</h2>
+
+        <div class="story-section fade-in-up">
+            <p class="story-text">
+                Born from frustration with <span class="highlight">daily indecision paralysis</span>, Decision Dice
+                transforms
+                the simple concept of rolling dice into a beautiful, modern experience. We believe that
+                <span class="highlight">not every decision deserves deep analysis</span> - sometimes you just need
+                to pick something and move forward. Our mission is to help people break free from overthinking
+                and build confidence in their decision-making abilities.
+            </p>
         </div>
 
-        <button class="roll-button" id="main-roll-btn" onclick="openModal()">
-            🎲 Set Options & Roll
-        </button>
-    </div>
-
-    <!-- Modal -->
-    <div class="modal-overlay" id="modal-overlay">
-        <div class="modal">
-            <div class="modal-header">
-                <div class="modal-title">🎲 Set Your Options</div>
-                <div class="modal-subtitle">Add your choices, then roll the dice</div>
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card fade-in-up">
+                <span class="stat-number">10K+</span>
+                <div class="stat-label">Decisions Made</div>
             </div>
-
-            <div class="options-section">
-                <div class="options-list" id="options-list">
-                    <div class="option-item">
-                        <span class="option-text">Add your first option below!</span>
-                    </div>
-                </div>
+            <div class="stat-card fade-in-up">
+                <span class="stat-number">2.3s</span>
+                <div class="stat-label">Average Decision Time</div>
             </div>
-
-            <div class="input-section">
-                <div class="input-group">
-                    <input type="text" class="option-input" id="option-input" placeholder="Enter a decision option..."
-                        maxlength="50">
-                    <button class="add-btn" onclick="addOption()">Add</button>
-                </div>
+            <div class="stat-card fade-in-up">
+                <span class="stat-number">94%</span>
+                <div class="stat-label">Follow-Through Rate</div>
             </div>
-
-            <div class="modal-actions">
-                <button class="modal-btn btn-cancel" onclick="closeModal()">Cancel</button>
-                <button class="modal-btn btn-roll-modal" id="modal-roll-btn" onclick="startRoll()" disabled>
-                    🎲 Roll Dice
-                </button>
+            <div class="stat-card fade-in-up">
+                <span class="stat-number">∞</span>
+                <div class="stat-label">Overthinking Eliminated</div>
             </div>
         </div>
-    </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="section" id="team">
+        <h2 class="section-title fade-in-up">The Visionaries</h2>
+
+        <div class="team-section fade-in-up">
+            <div class="team-avatar">👥</div>
+            <p class="team-text">
+                We are <span class="highlight">agile thinkers and visionaries</span> who believe in the power of
+                simple solutions to complex problems. With backgrounds in development, design, and psychology,
+                we combine technical excellence with deep understanding of human behavior to create tools that
+                actually improve people's lives.
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p class="footer-text">Built with ❤️ by decision-makers, for decision-makers</p>
+        <div class="footer-links">
+            <a href="#" class="footer-link">Privacy Policy</a>
+            <a href="#" class="footer-link">Terms of Service</a>
+            <a href="#" class="footer-link">Contact</a>
+            <a href="#" class="footer-link">GitHub</a>
+        </div>
+    </footer>
 
     <script>
-        // Game state
-        let options = [];
-        let isRolling = false;
+        // Create floating particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const particleCount = 15;
 
-        // Three.js setup
-        let scene, camera, renderer, dice;
-        let animationId;
-
-        function initThreeJS() {
-            const canvas = document.getElementById('dice-canvas');
-            const container = canvas.parentElement;
-
-            // Scene setup
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-
-            // Set size to fill most of screen
-            const width = Math.min(window.innerWidth * 0.9, 800);
-            const height = Math.min(window.innerHeight * 0.6, 600);
-            renderer.setSize(width, height);
-            renderer.setClearColor(0x000000, 0);
-
-            // Create HUGE dice - 4x bigger!
-            const geometry = new THREE.BoxGeometry(6, 6, 6);
-            const materials = [];
-
-            // Create materials for each face with high resolution
-            for (let i = 0; i < 6; i++) {
-                const canvas2d = document.createElement('canvas');
-                canvas2d.width = 1024;
-                canvas2d.height = 1024;
-                const context = canvas2d.getContext('2d');
-
-               // Create wood texture background
-                createWoodTexture(context, 1024, 1024);
-
-                // Add grid overlay
-                drawGrid(context, 1024, 1024);
-
-                // Border with wood-friendly color
-                context.strokeStyle = '#4a2c17';
-                context.lineWidth = 20;
-                context.strokeRect(20, 20, 984, 984);
-
-                // Placeholder number with shadow for wood texture
-                context.font = 'bold 300px Arial';
-                context.textAlign = 'center';
-                context.textBaseline = 'middle';
-
-                // Dark shadow/stroke for contrast
-                context.strokeStyle = '#2d1810';
-                context.lineWidth = 24; // 8% of font size
-                context.strokeText((i + 1).toString(), 512, 512);
-
-                // White text on top
-                context.fillStyle = '#ffffff';
-                context.fillText((i + 1).toString(), 512, 512);
-
-                const texture = new THREE.CanvasTexture(canvas2d);
-                materials.push(new THREE.MeshPhongMaterial({
-                    map: texture,
-                    shininess: 30, // Less shiny
-                    specular: new THREE.Color(0x111111) // Very subtle specular
-                }));
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                container.appendChild(particle);
             }
+        }
 
-            dice = new THREE.Mesh(geometry, materials);
-            scene.add(dice);
+        // Scroll animations
+        function handleScrollAnimations() {
+            const elements = document.querySelectorAll('.fade-in-up');
 
-            // Add subtle "table" with grid lines
-            const tableGeometry = new THREE.PlaneGeometry(20, 20);
-            const tableMaterial = new THREE.MeshLambertMaterial({
-                color: 0x1e293b,
-                transparent: true,
-                opacity: 0.6
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
             });
-            const table = new THREE.Mesh(tableGeometry, tableMaterial);
-            table.rotation.x = -Math.PI / 2;
-            table.position.y = -3;
-            scene.add(table);
 
-            // Add grid lines to table
-            const gridHelper = new THREE.GridHelper(20, 10, 0x334155, 0x2a3441);
-            gridHelper.position.y = -2.99; // Just above table surface
-            scene.add(gridHelper);
-
-            // Position camera to look down at dice (like looking at table)
-            camera.position.z = 8;
-            camera.position.y = 8;
-            camera.position.x = 2;
-            camera.lookAt(0, 0, 0);
-
-            // Lighting optimized for table-top view
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-            scene.add(ambientLight);
-
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(5, 10, 5); // Light from above like ceiling light
-            scene.add(directionalLight);
-
-            const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
-            fillLight.position.set(-5, 5, -5); // Soft fill light
-            scene.add(fillLight);
-
-            // Winner spotlight (initially off)
-            const winnerSpotlight = new THREE.SpotLight(0xffdd88, 2, 0, Math.PI / 6, 0.5, 1); // Golden light
-            winnerSpotlight.position.set(0, 8, 0);
-            winnerSpotlight.target.position.set(0, 0, 0);
-            winnerSpotlight.visible = false; // Start hidden
-            scene.add(winnerSpotlight);
-            scene.add(winnerSpotlight.target);
-
-            // Add extra point light for winner effect (initially off)
-            const winnerPointLight = new THREE.PointLight(0xffcc66, 0, 15); // Warm golden
-            winnerPointLight.position.set(0, 8, 0);
-            winnerPointLight.visible = false;
-            scene.add(winnerPointLight);
-
-            // Store lights for later access
-            window.sceneLights = {
-                ambient: ambientLight,
-                directional: directionalLight,
-                fill: fillLight,
-                winner: winnerSpotlight,
-                winnerPoint: winnerPointLight
-            };
-
-            // Start render loop
-            animate();
-
-            // Handle resize
-            window.addEventListener('resize', onWindowResize);
+            elements.forEach(el => observer.observe(el));
         }
 
-        function animate() {
-            animationId = requestAnimationFrame(animate);
-
-            if (!isRolling) {
-                // Very subtle idle movement - like dice barely moving on table
-                // dice.rotation.y += 0.002;
-            }
-
-            renderer.render(scene, camera);
+        // Smooth scrolling for navigation
+        function setupSmoothScrolling() {
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
         }
 
-        function onWindowResize() {
-            const width = Math.min(window.innerWidth * 0.9, 800);
-            const height = Math.min(window.innerHeight * 0.6, 600);
+        // Animate stats numbers
+        function animateStats() {
+            const statNumbers = document.querySelectorAll('.stat-number');
 
-            camera.aspect = width / height;
-            camera.updateProjectionMatrix();
-            renderer.setSize(width, height);
-        }
-
-        function updateDiceFaces() {
-                if (options.length === 0) return;
-
-                for (let i = 0; i < 6; i++) {
-                    const canvas2d = document.createElement('canvas');
-                    canvas2d.width = 1024;
-                    canvas2d.height = 1024;
-                    const context = canvas2d.getContext('2d');
-
-                    // Create wood texture background
-                    createWoodTexture(context, 1024, 1024);
-
-                    // Add grid overlay
-                    drawGrid(context, 1024, 1024);
-
-                    // Border with wood-friendly color
-                    context.strokeStyle = '#4a2c17';
-                    context.lineWidth = 20;
-                    context.strokeRect(20, 20, 984, 984);
-
-                    // Main text with shadow for wood texture readability
-                    if (i < options.length) {
-                        context.textAlign = 'center';
-                        context.textBaseline = 'middle';
-
-                        const optionText = options[i];
-
-                        // Helper function to draw text with shadow
-                        function drawTextWithShadow(text, x, y, fontSize) {
-                            context.font = `bold ${fontSize}px Arial`;
-
-                            // Dark shadow/stroke for contrast
-                            context.strokeStyle = '#2d1810';
-                            context.lineWidth = fontSize * 0.08; // Proportional stroke
-                            context.strokeText(text, x, y);
-
-                            // White text on top
-                            context.fillStyle = '#ffffff';
-                            context.fillText(text, x, y);
-                        }
-
-                        // Adjust font size for massive dice - BIGGER TEXT!
-                        if (optionText.length <= 4) {
-                            drawTextWithShadow(optionText, 512, 512, 220);
-                        } else if (optionText.length <= 8) {
-                            drawTextWithShadow(optionText, 512, 512, 180);
-                        } else if (optionText.length <= 12) {
-                            drawTextWithShadow(optionText, 512, 512, 140);
-                        } else {
-                            // Multi-line for longer text
-                            const words = optionText.split(' ');
-                            let line = '';
-                            let y = 512;
-                            const maxWidth = 750;
-                            const fontSize = 110;
-                            context.font = `bold ${fontSize}px Arial`;
-
-                            for (let n = 0; n < words.length; n++) {
-                                const testLine = line + words[n] + ' ';
-                                const metrics = context.measureText(testLine);
-
-                                if (metrics.width > maxWidth && n > 0) {
-                                    drawTextWithShadow(line.trim(), 512, y - 70, fontSize);
-                                    line = words[n] + ' ';
-                                    y += 140;
-                                } else {
-                                    line = testLine;
-                                }
+            statNumbers.forEach(stat => {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const text = entry.target.textContent;
+                            if (text.includes('K')) {
+                                animateNumber(entry.target, 0, 10, 'K+', 2000);
+                            } else if (text.includes('s')) {
+                                animateDecimal(entry.target, 0, 2.3, 's', 2000);
+                            } else if (text.includes('%')) {
+                                animateNumber(entry.target, 0, 94, '%', 2000);
                             }
-                            drawTextWithShadow(line.trim(), 512, y - 70, fontSize);
+                            observer.unobserve(entry.target);
                         }
-                    } else {
-                        // Empty face with wood-friendly styling
-                        context.font = 'bold 200px Arial';
-                        context.textAlign = 'center';
-                        context.textBaseline = 'middle';
+                    });
+                });
 
-                        // Shadow for question mark
-                        context.strokeStyle = '#2d1810';
-                        context.lineWidth = 16;
-                        context.strokeText('?', 512, 512);
+                observer.observe(stat);
+            });
+        }
 
-                        // Light question mark
-                        context.fillStyle = '#f4f1eb';
-                        context.fillText('?', 512, 512);
-                    }
+        function animateNumber(element, start, end, suffix, duration) {
+            const startTime = performance.now();
 
-                    const texture = new THREE.CanvasTexture(canvas2d);
-                    dice.material[i].map = texture;
-                    dice.material[i].emissive = new THREE.Color(0x000000); // Reset glow
-                    dice.material[i].emissiveIntensity = 0;
-                    dice.material[i].needsUpdate = true;
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                const current = Math.round(start + (end - start) * easeOut);
+
+                element.textContent = current + suffix;
+
+                if (progress < 1) {
+                    requestAnimationFrame(update);
                 }
             }
 
-        function createWoodTexture(context, width, height) {
-                // Base wood color - warm brown
-                const baseColor = '#d2b48c'; // Tan/light brown
-                context.fillStyle = baseColor;
-                context.fillRect(0, 0, width, height);
+            requestAnimationFrame(update);
+        }
 
-                // Add wood grain using multiple layers
-                addWoodGrain(context, width, height);
-                addWoodKnots(context, width, height);
-                addWoodNoise(context, width, height);
-            }
+        function animateDecimal(element, start, end, suffix, duration) {
+            const startTime = performance.now();
 
-            function addWoodGrain(context, width, height) {
-                // Create horizontal wood grain lines
-                const grainLines = 40;
-                for (let i = 0; i < grainLines; i++) {
-                    const y = (i / grainLines) * height;
-                    const opacity = 0.1 + Math.random() * 0.1;
-                    const darkness = Math.random() * 30;
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                const current = (start + (end - start) * easeOut).toFixed(1);
 
-                    context.strokeStyle = `rgba(${139 - darkness}, ${90 - darkness}, ${43 - darkness}, ${opacity})`;
-                    context.lineWidth = 2 + Math.random() * 3;
+                element.textContent = current + suffix;
 
-                    context.beginPath();
-                    context.moveTo(0, y);
-
-                    // Create wavy grain lines
-                    for (let x = 0; x <= width; x += 10) {
-                        const waveY = y + Math.sin(x * 0.01 + i) * 8;
-                        context.lineTo(x, waveY);
-                    }
-                    context.stroke();
+                if (progress < 1) {
+                    requestAnimationFrame(update);
                 }
             }
 
-            function addWoodKnots(context, width, height) {
-                // Add a few wood knots for realism
-                const knotCount = 2 + Math.random() * 3;
-
-                for (let i = 0; i < knotCount; i++) {
-                    const x = Math.random() * width;
-                    const y = Math.random() * height;
-                    const radius = 20 + Math.random() * 40;
-
-                    // Create gradient for knot
-                    const gradient = context.createRadialGradient(x, y, 0, x, y, radius);
-                    gradient.addColorStop(0, 'rgba(101, 67, 33, 0.4)');
-                    gradient.addColorStop(0.7, 'rgba(139, 90, 43, 0.2)');
-                    gradient.addColorStop(1, 'rgba(210, 180, 140, 0)');
-
-                    context.fillStyle = gradient;
-                    context.beginPath();
-                    context.arc(x, y, radius, 0, Math.PI * 2);
-                    context.fill();
-
-                    // Add knot ring
-                    context.strokeStyle = 'rgba(101, 67, 33, 0.3)';
-                    context.lineWidth = 2;
-                    context.beginPath();
-                    context.arc(x, y, radius * 0.7, 0, Math.PI * 2);
-                    context.stroke();
-                }
-            }
-
-            function addWoodNoise(context, width, height) {
-                // Add subtle texture noise
-                const imageData = context.getImageData(0, 0, width, height);
-                const data = imageData.data;
-
-                for (let i = 0; i < data.length; i += 4) {
-                    const noise = (Math.random() - 0.5) * 15;
-                    data[i] = Math.max(0, Math.min(255, data[i] + noise));     // Red
-                    data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + noise)); // Green  
-                    data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + noise)); // Blue
-                }
-
-                context.putImageData(imageData, 0, 0);
-            }
-
-            function drawGrid(context, width, height) {
-                const gridSize = 64; // Grid cell size
-                context.strokeStyle = 'rgba(101, 67, 33, 0.3)'; // Dark brown grid lines
-                context.lineWidth = 1;
-
-                // Vertical lines
-                for (let x = gridSize; x < width; x += gridSize) {
-                    context.beginPath();
-                    context.moveTo(x, 0);
-                    context.lineTo(x, height);
-                    context.stroke();
-                }
-
-                // Horizontal lines  
-                for (let y = gridSize; y < height; y += gridSize) {
-                    context.beginPath();
-                    context.moveTo(0, y);
-                    context.lineTo(width, y);
-                    context.stroke();
-                }
-            }
-        // Modal functions
-        function openModal() {
-            document.getElementById('modal-overlay').classList.add('active');
-            document.getElementById('option-input').focus();
+            requestAnimationFrame(update);
         }
 
-        function closeModal() {
-            document.getElementById('modal-overlay').classList.remove('active');
-        }
-
-        function addOption() {
-            const input = document.getElementById('option-input');
-            const text = input.value.trim();
-
-            if (text && options.length < 6) {
-                options.push(text);
-                input.value = '';
-                updateOptionsDisplay();
-                updateDiceFaces();
-                updateModalRollButton();
-            }
-        }
-
-        function removeOption(index) {
-            options.splice(index, 1);
-            updateOptionsDisplay();
-            updateDiceFaces();
-            updateModalRollButton();
-        }
-
-        function updateOptionsDisplay() {
-            const container = document.getElementById('options-list');
-
-            if (options.length === 0) {
-                container.innerHTML = '<div class="option-item"><span class="option-text">Add your first option below!</span></div>';
-            } else {
-                container.innerHTML = options.map((option, index) =>
-                    `<div class="option-item">
-                        <span class="option-text">${option}</span>
-                        <button class="remove-btn" onclick="removeOption(${index})">×</button>
-                    </div>`
-                ).join('');
-            }
-        }
-
-        function updateModalRollButton() {
-            const rollBtn = document.getElementById('modal-roll-btn');
-            rollBtn.disabled = options.length < 2;
-
-            if (options.length < 2) {
-                rollBtn.textContent = `🎲 Need ${2 - options.length} more options`;
-            } else {
-                rollBtn.textContent = '🎲 Roll Dice';
-            }
-        }
-
-        function startRoll() {
-            closeModal();
-            rollDice();
-        }
-
-        function rollDice() {
-            if (options.length < 2 || isRolling) return;
-
-            isRolling = true;
-            const mainBtn = document.getElementById('main-roll-btn');
-
-            mainBtn.style.opacity = '0';
-            mainBtn.disabled = true;
-
-            // Reset lighting for fresh roll
-            resetLighting();
-
-            // Pre-determine which face will end UP (like real dice)
-            const winningFace = Math.floor(Math.random() * Math.min(options.length, 6));
-
-            // Define stable orientations where each face points UP
-            const stableOrientations = [
-                { x: 0, y: 0, z: -Math.PI / 2 },        // Face 0 (+X) up
-                { x: 0, y: 0, z: Math.PI / 2 },         // Face 1 (-X) up  
-                { x: 0, y: 0, z: 0 },                 // Face 2 (+Y) up - natural top
-                { x: Math.PI, y: 0, z: 0 },           // Face 3 (-Y) up - bottom becomes top
-                { x: Math.PI / 2, y: 0, z: 0 },         // Face 4 (+Z) up - front becomes top
-                { x: -Math.PI / 2, y: 0, z: 0 }         // Face 5 (-Z) up - back becomes top
-            ];
-
-            const targetOrientation = stableOrientations[winningFace];
-
-            // Store initial rotation
-            const initialRotation = {
-                x: dice.rotation.x,
-                y: dice.rotation.y,
-                z: dice.rotation.z
-            };
-
-            // Add dramatic spins before settling to target
-            const spins = Math.floor(Math.random() * 4) + 3; // 3-6 full rotations
-            const finalRotation = {
-                x: targetOrientation.x + (spins * Math.PI * 2),
-                y: targetOrientation.y + (spins * Math.PI * 2),
-                z: targetOrientation.z + (spins * Math.PI * 2)
-            };
-
-            // Animation variables
-            let rollTime = 0;
-            const rollDuration = 4000; // 4 seconds for maximum drama
-
-            function rollAnimation() {
-                if (rollTime < rollDuration) {
-                    const progress = rollTime / rollDuration;
-                    const easeOut = 1 - Math.pow(1 - progress, 4); // Smooth deceleration
-
-                    // Interpolate rotation
-                    dice.rotation.x = initialRotation.x + (finalRotation.x - initialRotation.x) * easeOut;
-                    dice.rotation.y = initialRotation.y + (finalRotation.y - initialRotation.y) * easeOut;
-                    dice.rotation.z = initialRotation.z + (finalRotation.z - initialRotation.z) * easeOut;
-
-                    rollTime += 16;
-                    requestAnimationFrame(rollAnimation);
-                } else {
-                    // Snap to exact stable position (like real dice settling)
-                    dice.rotation.x = targetOrientation.x;
-                    dice.rotation.y = targetOrientation.y;
-                    dice.rotation.z = targetOrientation.z;
-
-                    // WINNER SHINE EFFECT! ✨ - Immediate, no delay
-                    activateWinnerShine();
-
-                    // Roll finished - show button again
-                    setTimeout(() => {
-                        mainBtn.textContent = '🎲 Roll Again';
-                        mainBtn.style.opacity = '1';
-                        mainBtn.disabled = false;
-                        isRolling = false;
-                    }, 2000); // Longer pause to enjoy the shine effect
-                }
-            }
-
-            rollAnimation();
-        }
-
-        function activateWinnerShine() {
-            const lights = window.sceneLights;
-
-            // Animation for dramatic lighting transition
-            const shineDuration = 1000; // 1 second transition
-            let shineTime = 0;
-
-            const originalAmbient = lights.ambient.intensity;
-            const originalDirectional = lights.directional.intensity;
-            const originalFill = lights.fill.intensity;
-
-            function createShine() {
-                if (shineTime < shineDuration) {
-                    const progress = shineTime / shineDuration;
-                    const easeOut = 1 - Math.pow(1 - progress, 2);
-
-                    // Dramatically dim all general lighting
-                    lights.ambient.intensity = originalAmbient * (1 - easeOut * 0.7); // Less extreme dimming
-                    lights.fill.intensity = originalFill * (1 - easeOut * 0.8); // Keep some fill
-                    lights.directional.intensity = originalDirectional * (1 - easeOut * 0.5); // Keep more directional
-
-                    // Controlled spotlight - bright but not blinding
-                    // lights.winner.intensity = easeOut * 3; // Much less intense
-                    // lights.winner.visible = true;
-                    // lights.winner.position.set(0, 10, 0); // Slightly lower
-                    // lights.winner.target.position.set(0, 0, 0); // Point at dice center
-                    // lights.winner.angle = Math.PI / 10; // Slightly wider beam
-                    // lights.winner.penumbra = 0.3; // Softer edges
-
-                    // Gentler point light for ambient glow
-                    lights.winnerPoint.intensity = easeOut * 1.5; // Subtle glow
-                    lights.winnerPoint.visible = true;
-                    lights.winnerPoint.position.set(0, 6, 0); // Closer to dice
-
-                    // Add a subtle camera shake for impact
-                    if (progress > 0.8) {
-                        const shake = (1 - progress) * 0.1;
-                        camera.position.x = 2 + (Math.random() - 0.5) * shake;
-                        camera.position.z = 8 + (Math.random() - 0.5) * shake;
-                    }
-
-                    shineTime += 16;
-                    requestAnimationFrame(createShine);
-                } else {
-                    // Final state - maintain dramatic but readable lighting
-                    lights.ambient.intensity = originalAmbient * 0.3; // Not too dark
-                    lights.directional.intensity = originalDirectional * 0.5; // Keep some general light
-                    lights.fill.intensity = originalFill * 0.2; // Subtle fill
-                    lights.winner.intensity = 3; // Bright but readable
-                    lights.winnerPoint.intensity = 1.5; // Gentle glow
-
-                    // Reset camera position
-                    camera.position.x = 2;
-                    camera.position.z = 8;
-
-                    // Optional: Add a subtle pulsing effect to the spotlight
-                    let pulseTime = 0;
-                    function pulseLight() {
-                        if (isRolling) return; // Stop pulsing when rolling again
-                        pulseTime += 0.05;
-                        lights.winner.intensity = 3 + Math.sin(pulseTime) * 0.3; // Gentle pulse
-                        lights.winnerPoint.intensity = 1.5 + Math.sin(pulseTime) * 0.2;
-                        requestAnimationFrame(pulseLight);
-                    }
-                    pulseLight();
-                }
-            }
-
-            createShine();
-        }
-
-
-
-        function resetLighting() {
-            const lights = window.sceneLights;
-            if (!lights) return;
-
-            // Reset to normal lighting for next roll
-            lights.ambient.intensity = 0.4;
-            lights.directional.intensity = 0.8;
-            lights.fill.intensity = 0.3;
-            lights.winner.visible = false;
-            lights.winner.intensity = 0;
-            lights.winnerPoint.visible = false;
-            lights.winnerPoint.intensity = 0;
-
-            // Reset camera position in case it was shaking
-            camera.position.x = 2;
-            camera.position.z = 8;
-        }
-
-        // Input handling
-        document.addEventListener('keypress', function (e) {
-            if (e.target.id === 'option-input' && e.key === 'Enter') {
-                addOption();
-            }
-        });
-
-        // Close modal on escape
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') {
-                closeModal();
-            }
-        });
-
-        // Initialize
+        // Initialize everything
         document.addEventListener('DOMContentLoaded', function () {
-            initThreeJS();
-            updateOptionsDisplay();
-            updateModalRollButton();
+            createParticles();
+            handleScrollAnimations();
+            setupSmoothScrolling();
+            animateStats();
+        });
+
+        // Add some mouse interaction
+        document.addEventListener('mousemove', function (e) {
+            const cards = document.querySelectorAll('.feature-card');
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    const rotateX = (y - centerY) / 10;
+                    const rotateY = (centerX - x) / 10;
+
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
+                } else {
+                    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)';
+                }
+            });
         });
     </script>
 </body>
