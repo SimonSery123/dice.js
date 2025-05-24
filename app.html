@@ -312,8 +312,6 @@
 
 <body>
     <div class="main-container">
-       
-
         <div class="dice-stage">
             <canvas id="dice-canvas"></canvas>
         </div>
@@ -642,6 +640,12 @@
                 }
             }
 
+            /**
+             * Adds a few wood knots to the texture for realism.
+             * @param {CanvasRenderingContext2D} context - The canvas context to draw on.
+             * @param {number} width - The width of the canvas.
+             * @param {number} height - The height of the canvas.
+             */
             function addWoodKnots(context, width, height) {
                 // Add a few wood knots for realism
                 const knotCount = 2 + Math.random() * 3;
@@ -671,6 +675,15 @@
                 }
             }
 
+            /**
+             * Adds subtle texture noise to the wood background to give it a more realistic look.
+             * This is done by iterating over each pixel in the image and adding a small amount of
+             * random noise to each color channel. This helps to break up the uniformity of the
+             * wood grain and gives the background a more organic feel.
+             * @param {CanvasRenderingContext2D} context - The canvas rendering context.
+             * @param {number} width - The width of the canvas.
+             * @param {number} height - The height of the canvas.
+             */
             function addWoodNoise(context, width, height) {
                 // Add subtle texture noise
                 const imageData = context.getImageData(0, 0, width, height);
@@ -686,6 +699,13 @@
                 context.putImageData(imageData, 0, 0);
             }
 
+            /**
+             * Draws a subtle grid on the given context, with grid cell size of 64.
+             * The grid lines are dark brown, with an opacity of 0.3.
+             * @param {CanvasRenderingContext2D} context - The canvas context to draw on.
+             * @param {number} width - The width of the canvas.
+             * @param {number} height - The height of the canvas.
+             */
             function drawGrid(context, width, height) {
                 const gridSize = 64; // Grid cell size
                 context.strokeStyle = 'rgba(101, 67, 33, 0.3)'; // Dark brown grid lines
@@ -737,6 +757,13 @@
             updateModalRollButton();
         }
 
+        /**
+         * Updates the display of the options list within the modal. If no options
+         * are present, a prompt to add the first option is shown. Otherwise, the
+         * list of current options is rendered, each with a remove button to
+         * delete the respective option.
+         */
+
         function updateOptionsDisplay() {
             const container = document.getElementById('options-list');
 
@@ -751,6 +778,13 @@
                 ).join('');
             }
         }
+
+        /**
+         * Updates the state and text of the modal roll button based on the number
+         * of options available. If there are fewer than two options, the button is
+         * disabled and displays the number of additional options needed. Otherwise,
+         * the button is enabled and set to allow rolling the dice.
+         */
 
         function updateModalRollButton() {
             const rollBtn = document.getElementById('modal-roll-btn');
@@ -768,6 +802,15 @@
             rollDice();
         }
 
+        /**
+         * Roll the dice! If there are at least two options and the dice isn't
+         * already rolling, this starts a dramatic animation of the dice
+         * rolling around, settling to a random face, and then making the
+         * winning face shine.
+         *
+         * Also handles re-enabling the Roll button after the animation
+         * finishes.
+         */
         function rollDice() {
             if (options.length < 2 || isRolling) return;
 
@@ -814,6 +857,14 @@
             let rollTime = 0;
             const rollDuration = 4000; // 4 seconds for maximum drama
 
+            /**
+             * Animation loop to roll the dice, smoothly transitioning between
+             * the initial rotation to the target stable orientation, with
+             * deceleration to simulate friction.
+             *
+             * Also handles the shine effect on the winning face, and
+             * re-enables the Roll button after a short delay.
+             */
             function rollAnimation() {
                 if (rollTime < rollDuration) {
                     const progress = rollTime / rollDuration;
@@ -848,6 +899,18 @@
             rollAnimation();
         }
 
+        /**
+         * Creates a dramatic lighting effect for the winner, gradually
+         * dimming all other lights and adding a bright spotlight and ambient
+         * glow. Also adds a subtle camera shake for extra impact.
+         *
+         * @param {Number} shineTime - Time in milliseconds to transition
+         *     from current lighting to the winner lighting.
+         * @param {Number} originalAmbient - Original ambient light intensity.
+         * @param {Number} originalDirectional - Original directional light
+         *     intensity.
+         * @param {Number} originalFill - Original fill light intensity.
+         */
         function activateWinnerShine() {
             const lights = window.sceneLights;
 
@@ -919,7 +982,16 @@
             createShine();
         }
 
-
+/**
+ * Resets the lighting and camera position to their default states.
+ *
+ * This function reverts the intensities of various lights and visibility status
+ * to their normal levels after a dramatic lighting effect. It ensures that the
+ * ambient, directional, and fill lights are set to their default intensities.
+ * It also makes the winner and winnerPoint lights invisible and resets their
+ * intensities. Additionally, it resets the camera's position to avoid any
+ * residual shaking effect.
+ */
 
         function resetLighting() {
             const lights = window.sceneLights;
